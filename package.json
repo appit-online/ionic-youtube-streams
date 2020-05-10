@@ -1,6 +1,6 @@
 {
   "name": "ionic-youtube-streams",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fetch meta information about YouTube videos including stream urls",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -21,6 +21,10 @@
   },
   "keywords": [
     "youtube",
+    "ionic youtube",
+    "ionic youtube streams",
+    "ionic youtube videos",
+    "ionic youtube info",
     "youtube streams",
     "youtube video streams",
     "youtube video urls",
