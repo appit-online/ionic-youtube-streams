@@ -30,7 +30,7 @@ import * as yt from 'ionic-youtube-streams';
  * Given a search query, searching on youtube
  * @param {string} search value (videoId).
  */
-const video = yt.info('y5kIrbG2gRc');
+const video = await yt.info('y5kIrbG2gRc');
 console.log('Info:');
 console.log(video);
 
@@ -2534,7 +2534,7 @@ const yt = require('ionic-youtube-streams');
  * Given a search query, searching on youtube
  * @param {string} search value.
  */
-const video = yt.info('My Search Query');
+const video = await yt.info('My Search Query');
 console.log('Info:');
 console.log(video);
 ```
