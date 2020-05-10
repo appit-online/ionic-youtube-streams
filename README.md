@@ -1,6 +1,6 @@
 # [ionic-youtube-streams: Node.js](https://github.com/appit-online/ionic-youtube-streams)
 
-Fetch meta information about YouTube videos including stream urls
+Fetch meta information about YouTube videos including stream urls in ionic apps
 
 **Table of contents:**
 
