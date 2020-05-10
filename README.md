@@ -2527,18 +2527,6 @@ console.log(video);
 }
 ```
 
-```javascript
-const yt = require('ionic-youtube-streams');
-
-/**
- * Given a search query, searching on youtube
- * @param {string} search value.
- */
-const video = await yt.info('My Search Query');
-console.log('Info:');
-console.log(video);
-```
-
 ## Supported Node.js Versions
 
 Our client libraries follow the [Node.js release schedule](https://nodejs.org/en/about/releases/).
