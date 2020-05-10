@@ -1,6 +1,6 @@
 {
   "name": "ionic-youtube-streams",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Fetch meta information about YouTube videos including stream urls",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/appit-online/ionic-youtube-stream.git"
+    "url": "git+https://github.com/appit-online/ionic-youtube-streams.git"
   },
   "keywords": [
     "youtube",
