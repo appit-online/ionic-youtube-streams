@@ -16,6 +16,7 @@ export class ValidationService {
     );
   }
 
+  // tslint:disable-next-line:variable-name
   playError(player_response: any, statuses: any) {
     const playability = player_response && player_response.playabilityStatus;
     if (playability && statuses.includes(playability.status)) {
@@ -24,6 +25,7 @@ export class ValidationService {
     return null;
   }
 
+  // tslint:disable-next-line:variable-name
   privateVideoError(player_response: any){
     const playability = player_response && player_response.playabilityStatus;
     if (playability && playability.status === 'LOGIN_REQUIRED' && playability.messages &&
@@ -34,12 +36,14 @@ export class ValidationService {
     }
   }
 
+  // tslint:disable-next-line:variable-name
   isRental(player_response: any){
     const playability = player_response.playabilityStatus;
     return playability && playability.status === 'UNPLAYABLE' &&
       playability.errorScreen && playability.errorScreen.playerLegacyDesktopYpcOfferRenderer;
   }
 
+  // tslint:disable-next-line:variable-name
   isNotYetBroadcasted(player_response: any){
     const playability = player_response.playabilityStatus;
     return playability && playability.status === 'LIVE_STREAM_OFFLINE';

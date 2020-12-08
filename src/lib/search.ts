@@ -51,17 +51,18 @@ export async function searchVideo(this: any, youtubeId: string, sortType: string
     try{
       info.formats.sort(formatUtils.sortFormatsByVideo);
     }catch (e){
+      // tslint:disable-next-line:no-console
       console.log(e);
     }
   }else{
     try{
       info.formats.sort(formatUtils.sortFormatsByAudio);
     }catch (e){
+      // tslint:disable-next-line:no-console
       console.log(e);
     }
   }
   info.full = true;
 
-  console.log(info.formats);
   return info;
 }
