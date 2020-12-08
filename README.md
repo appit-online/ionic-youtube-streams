@@ -34,6 +34,16 @@ const video = await yt.info('y5kIrbG2gRc');
 console.log('Info:');
 console.log(video);
 
+
+/**
+ * Given a search query, searching on youtube, sort quality by type
+ * @param {string} search value (videoId).
+ * @param {string} sort type (audio | video).
+ */
+const video = await yt.sortByType('y5kIrbG2gRc', 'audio');
+const video = await yt.sortByType('y5kIrbG2gRc', 'video');
+
+
 {
    "csn":"_se3XpuIOYaCx_AP2PutuAE",
    "root_ve_type":"27240",

@@ -50,22 +50,16 @@ export class CiphService {
 
   cache = new Map();
 
-  async getTokens(html5playerfile: any) {
+  async getTokens(html5playerfile: any, options: any) {
     const cachedTokens = this.cache.get(html5playerfile);
-
-    if (cachedTokens) {
-      return cachedTokens;
-    } else {
-      const response: any = await this.httpClient.get(html5playerfile, {}, {});
-
-      const tokens = this.extractActions(response.data);
-      if (!tokens || !tokens.length) {
-        throw new Error('Could not extract signature deciphering actions');
-      }
-
-      this.cache.set(html5playerfile, tokens);
-      return tokens;
+    const response: any = await this.httpClient.get(html5playerfile, {}, {});
+    const tokens = this.extractActions(response.data);
+    if (!tokens || !tokens.length) {
+      throw new Error('Could not extract signature deciphering actions');
     }
+
+    this.cache.set(html5playerfile, tokens);
+    return tokens;
   }
 
   extractActions(body: any) {
@@ -123,7 +117,10 @@ export class CiphService {
 
 
 
-  decipherFormats(formats: any, tokens: any, debug: any) {
+  async decipherFormats(formats: any, html5player: any, options: any) {
+    const decipheredFormats: any = {};
+    const tokens = await this.getTokens(html5player, options);
+
     formats.forEach((format: any) => {
       const cipher = format.signatureCipher || format.cipher;
       if (cipher) {
@@ -132,8 +129,10 @@ export class CiphService {
         delete format.cipher;
       }
       const sig = tokens && format.s ? this.decipher(tokens, format.s) : null;
-      this.setDownloadURL(format, sig, debug);
+      this.setDownloadURL(format, sig);
+      decipheredFormats[format.url] = format;
     });
+    return decipheredFormats;
   }
 
   decipher = (tokens: any, sig: any) => {
@@ -167,25 +166,17 @@ export class CiphService {
     return sig.join('');
   }
 
-  setDownloadURL(format: any, sig: any, debug: any) {
+  setDownloadURL(format: any, sig: any) {
     let decodedUrl;
     if (format.url) {
       decodedUrl = format.url;
     } else {
-      if (debug) {
-        // tslint:disable-next-line:no-console
-        console.warn('Download url not found for itag ' + format.itag);
-      }
       return;
     }
 
     try {
       decodedUrl = decodeURIComponent(decodedUrl);
     } catch (err) {
-      if (debug) {
-        // tslint:disable-next-line:no-console
-        console.warn('Could not decode url: ' + err.message);
-      }
       return;
     }
 
@@ -205,11 +196,7 @@ export class CiphService {
       // When YouTube provides a `sp` parameter the signature `sig` must go
       // into the parameter it specifies.
       // See https://github.com/fent/node-ytdl-core/issues/417
-      if (format.sp) {
-        query[format.sp] = sig;
-      } else {
-        query.signature = sig;
-      }
+      query[format.sp || 'signature'] = sig;
     }
 
     format.url = url.format(parsedUrl);
