@@ -1,5 +1,6 @@
 import { HTTP } from '@ionic-native/http/ngx';
 import { UtilsService } from './utils.service';
+const siteCache = new Map();
 
 export class WatchHtmlService {
 
@@ -9,7 +10,7 @@ export class WatchHtmlService {
   async getWatchHTMLPage(id: any, options: any, httpClient: any){
     const utilsService = new UtilsService();
 
-    const body = await this.getHTMLWatchPageBody(id, options, utilsService);
+    const body = await this.getHTMLWatchPageBody(id, options, utilsService, this.httpClient);
     const info = { page: 'watch' };
     try {
       // @ts-ignore
@@ -35,10 +36,14 @@ export class WatchHtmlService {
     return utilsService.parseJSON(source, varName, utilsService.cutAfterJSON(`${prependJSON}${jsonStr}`));
   }
 
-  async getHTMLWatchPageBody(id: any, options: any, utilsService: any){
-    const url = utilsService.getHTMLWatchURL(id);
-    const response = await this.httpClient.get(url, {}, {
-    });
-    return response.data;
+  async getHTMLWatchPageBody(id: any, options: any, utilsService: any, httpClient: any){
+    if(siteCache.get(id)){
+      return siteCache.get(id)
+    }else{
+      const url = utilsService.getHTMLWatchURL(id);
+      const response = await httpClient.get(url, {}, {});
+      siteCache.set(id, response.data);
+      return response.data;
+    }
   }
 }

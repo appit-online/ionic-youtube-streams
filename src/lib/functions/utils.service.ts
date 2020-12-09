@@ -5,7 +5,7 @@ export class UtilsService {
   VIDEO_URL = VIDEO_URL;
 
   getHTMLWatchURL(id: any){
-    const params = '?hl=en';
+    const params = '&hl=en';
     return VIDEO_URL + id + params;
   };
 

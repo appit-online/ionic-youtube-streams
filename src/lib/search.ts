@@ -23,7 +23,7 @@ export async function searchVideo(this: any, youtubeId: string, sortType: string
     const utilsService = new UtilsService();
     const watchHtmlService = new WatchHtmlService(httpClient);
 
-    info.html5player = info.html5player || utilsService.getHTML5player(await watchHtmlService.getHTMLWatchPageBody(youtubeId, options, utilsService));
+    info.html5player = info.html5player || utilsService.getHTML5player(await watchHtmlService.getHTMLWatchPageBody(youtubeId, options, utilsService, httpClient));
     if (!info.html5player) {
       throw Error('Unable to find html5player file');
     }
