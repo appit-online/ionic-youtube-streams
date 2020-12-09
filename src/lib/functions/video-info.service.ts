@@ -12,7 +12,7 @@ export class VideoInfoService {
   constructor(public httpClient: HTTP) {
   }
 
-  async getVideoInfoPage(id: any, options: any){
+  async getVideoInfoPage(id: any, options: any, httpClient: any){
     const utilsService = new UtilsService();
     const url = urllib.format({
       protocol: 'https',
@@ -27,7 +27,7 @@ export class VideoInfoService {
       },
     });
 
-    const response = await this.httpClient.get(url, {}, {});
+    const response = await httpClient.get(url, {}, {});
     const moreinfo: any = querystring.parse(response.data);
     moreinfo.player_response = utilsService.findPlayerResponse('get_video_info', moreinfo);
     return moreinfo;

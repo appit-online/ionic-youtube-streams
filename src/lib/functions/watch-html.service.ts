@@ -9,8 +9,9 @@ export class WatchHtmlService {
 
   async getWatchHTMLPage(id: any, options: any, httpClient: any){
     const utilsService = new UtilsService();
+    const watchHtmlService = new WatchHtmlService(httpClient);
 
-    const body = await this.getHTMLWatchPageBody(id, options, utilsService, this.httpClient);
+    const body = await watchHtmlService.getHTMLWatchPageBody(id, options, utilsService, httpClient);
     const info = { page: 'watch' };
     try {
       // @ts-ignore
