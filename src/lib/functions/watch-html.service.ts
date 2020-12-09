@@ -15,15 +15,15 @@ export class WatchHtmlService {
     const info = { page: 'watch' };
     try {
       // @ts-ignore
-      info.player_response = localThis.findJSON('watch.html', 'player_response',
+      info.player_response = watchHtmlService.findJSON('watch.html', 'player_response',
         body, /\bytInitialPlayerResponse\s*=\s*\{/i, '\n', '{', utilsService);
     } catch (err) {
-      const args = this.findJSON('watch.html', 'player_response', body, /\bytplayer\.config\s*=\s*{/, '</script>', '{', utilsService);
+      const args = watchHtmlService.findJSON('watch.html', 'player_response', body, /\bytplayer\.config\s*=\s*{/, '</script>', '{', utilsService);
       // @ts-ignore
       info.player_response = utilsService.findPlayerResponse('watch.html', args);
     }
     // @ts-ignore
-    info.response = localThis.findJSON('watch.html', 'response', body, /\bytInitialData("\])?\s*=\s*\{/i, '\n', '{', utilsService);
+    info.response = watchHtmlService.findJSON('watch.html', 'response', body, /\bytInitialData("\])?\s*=\s*\{/i, '\n', '{', utilsService);
     // @ts-ignore
     info.html5player = utilsService.getHTML5player(body);
     return info;
