@@ -10,7 +10,7 @@ export class BasicInfoService {
 
   retryOptions = {
     maxRedirects: 10,
-    maxRetries: 1,
+    maxRetries: 0,
     maxReconnects: 0,
     backoff: { inc: 100, max: 10000 },
   };
