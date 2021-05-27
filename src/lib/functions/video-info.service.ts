@@ -24,6 +24,7 @@ export class VideoInfoService {
         ps: 'default',
         gl: 'US',
         hl: 'en',
+        html5: 1,
       },
     });
 

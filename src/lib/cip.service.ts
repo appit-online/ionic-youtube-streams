@@ -185,6 +185,7 @@ export class CiphService {
 
     // Deleting the `search` part is necessary otherwise changes to
     // `query` won't reflect when running `url.format()`
+    // @ts-ignore
     delete parsedUrl.search;
 
     const query = parsedUrl.query;
