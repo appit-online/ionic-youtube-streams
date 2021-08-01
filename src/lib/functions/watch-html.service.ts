@@ -29,7 +29,7 @@ export class WatchHtmlService {
         // @ts-ignore
         info.html5player = utilsService.getHTML5player(body);
     }catch(e) {
-
+      // @ts-ignore
     }
 
     return info;
