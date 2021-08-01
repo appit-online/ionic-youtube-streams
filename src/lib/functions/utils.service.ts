@@ -3,6 +3,7 @@ const VIDEO_URL = 'https://www.youtube.com/watch?v=';
 
 export class UtilsService {
   VIDEO_URL = VIDEO_URL;
+  cver = '2.20210622.10.00';
 
   getHTMLWatchURL(id: any){
     const params = '&hl=en';

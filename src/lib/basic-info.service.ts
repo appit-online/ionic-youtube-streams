@@ -4,6 +4,7 @@ import { WatchJsonService } from './functions/watch-json.service';
 import { WatchHtmlService } from './functions/watch-html.service';
 import { VideoInfoService } from './functions/video-info.service';
 import {UnrecoverableError} from './errors/unrecoverable-error';
+import {UtilsService} from "./functions/utils.service";
 
 
 export class BasicInfoService {
@@ -15,7 +16,7 @@ export class BasicInfoService {
     backoff: { inc: 100, max: 10000 },
   };
 
-  constructor(public httpClient: HTTP) {
+  constructor(public httpClient: HTTP, public utilsService: UtilsService) {
   }
 
   async getBasicInfo(id: any, options: any) {
@@ -24,10 +25,10 @@ export class BasicInfoService {
     const videoInfoService = new VideoInfoService(this.httpClient);
 
     const info = await this.pipeline([id, options], this.retryOptions, [
-      watchJsonService.getJSONWatchPage,
       watchHtmlService.getWatchHTMLPage,
+      watchJsonService.getJSONWatchPage,
       videoInfoService.getVideoInfoPage
-    ], this.httpClient);
+    ], this.httpClient, this.utilsService);
 
     Object.assign(info, {
       formats: this.parseFormats(info.player_response),
@@ -67,13 +68,13 @@ export class BasicInfoService {
    * @param {Array.<Function>} endpoints
    * @returns {[Object, Object, Object]}
    */
-  async pipeline(args: any, retryOptions: any, endpoints: any, httpClient: any){
+  async pipeline(args: any, retryOptions: any, endpoints: any, httpClient: any, utilsService: any){
     const validationService = new ValidationService();
 
     let info;
     for (const func of endpoints) {
       try {
-        const newInfo: any = await this.retryFunc(func, args, retryOptions, httpClient);
+        const newInfo: any = await this.retryFunc(func, args, retryOptions, httpClient, utilsService);
         newInfo.player_response.videoDetails = this.assign(info && info.player_response
           && info.player_response.videoDetails,
           newInfo.player_response.videoDetails);
@@ -110,12 +111,12 @@ export class BasicInfoService {
    * @param {Object} options.backoff
    * @param {number} options.backoff.inc
    */
-  async retryFunc(func: any, args: any, retryOptions: any, httpClient: any){
+  async retryFunc(func: any, args: any, retryOptions: any, httpClient: any, utilsService: any){
     let currentTry = 0;
     let result;
     while (currentTry <= retryOptions.maxRetries) {
       try {
-        result = await func(...args, httpClient);
+        result = await func(...args, httpClient, utilsService);
         break;
       } catch (err) {
         if (err instanceof UnrecoverableError ||

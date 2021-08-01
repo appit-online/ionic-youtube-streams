@@ -9,7 +9,8 @@ import { FormatUtilsService } from './format-utils.service';
 export async function searchVideo(this: any, youtubeId: string, sortType: string) {
   const httpClient = new HTTP();
   const options = {};
-  const basicInfoService = new BasicInfoService(httpClient);
+  const utilsService = new UtilsService();
+  const basicInfoService = new BasicInfoService(httpClient, utilsService);
   const info = await basicInfoService.getBasicInfo(youtubeId, {});
 
 /*  const hasManifest =
@@ -20,7 +21,6 @@ export async function searchVideo(this: any, youtubeId: string, sortType: string
 
   const funcs = [];
   if (info.formats.length) {
-    const utilsService = new UtilsService();
     const watchHtmlService = new WatchHtmlService(httpClient);
 
     info.html5player = info.html5player || utilsService.getHTML5player(await watchHtmlService.getHTMLWatchPageBody(youtubeId, options, utilsService, httpClient));

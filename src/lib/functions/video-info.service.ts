@@ -12,14 +12,15 @@ export class VideoInfoService {
   constructor(public httpClient: HTTP) {
   }
 
-  async getVideoInfoPage(id: any, options: any, httpClient: any){
-    const utilsService = new UtilsService();
+  async getVideoInfoPage(id: any, options: any, httpClient: any, utilsService: any){
     const url = urllib.format({
       protocol: 'https',
       host: INFO_HOST,
       pathname: INFO_PATH,
       query: {
         video_id: id,
+        c: 'TVHTML5',
+        cver: `7${utilsService.cver.substr(1)}`,
         eurl: VIDEO_EURL + id,
         ps: 'default',
         gl: 'US',

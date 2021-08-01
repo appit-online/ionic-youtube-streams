@@ -1,5 +1,4 @@
 import { HTTP } from '@ionic-native/http/ngx';
-import { UtilsService } from './utils.service';
 const siteCache = new Map();
 
 export class WatchHtmlService {
@@ -7,25 +6,32 @@ export class WatchHtmlService {
   constructor(public httpClient: HTTP) {
   }
 
-  async getWatchHTMLPage(id: any, options: any, httpClient: any){
-    const utilsService = new UtilsService();
+  async getWatchHTMLPage(id: any, options: any, httpClient: any, utilsService: any){
+
     const watchHtmlService = new WatchHtmlService(httpClient);
 
     const body = await watchHtmlService.getHTMLWatchPageBody(id, options, utilsService, httpClient);
     const info = { page: 'watch' };
     try {
+     utilsService.cver = utilsService.between(body, '{"key":"cver","value":"', '"}');
       // @ts-ignore
       info.player_response = watchHtmlService.findJSON('watch.html', 'player_response',
-        body, /\bytInitialPlayerResponse\s*=\s*\{/i, '\n', '{', utilsService);
+        body, /\bytInitialPlayerResponse\s*=\s*\{/i, '</script>', '{', utilsService);
     } catch (err) {
+
       const args = watchHtmlService.findJSON('watch.html', 'player_response', body, /\bytplayer\.config\s*=\s*{/, '</script>', '{', utilsService);
       // @ts-ignore
       info.player_response = utilsService.findPlayerResponse('watch.html', args);
     }
-    // @ts-ignore
-    info.response = watchHtmlService.findJSON('watch.html', 'response', body, /\bytInitialData("\])?\s*=\s*\{/i, '\n', '{', utilsService);
-    // @ts-ignore
-    info.html5player = utilsService.getHTML5player(body);
+    try{
+        // @ts-ignore
+        info.response = watchHtmlService.findJSON('watch.html', 'response', body, /\bytInitialData("\])?\s*=\s*\{/i, '</script>', '{', utilsService);
+        // @ts-ignore
+        info.html5player = utilsService.getHTML5player(body);
+    }catch(e) {
+
+    }
+
     return info;
   }
 
