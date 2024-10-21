@@ -69,5 +69,7 @@ export async function searchVideo(this: any, youtubeId: string, sortType: string
     const infoResponse = await tubeService.gotConfig(youtubeId, null, info, tubeService, httpClient);
     return infoResponse
   } catch (e) {
+    // @ts-ignore
+    console.log(e)
   }
 }
