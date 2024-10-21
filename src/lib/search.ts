@@ -7,20 +7,31 @@ export async function searchVideo(this: any, youtubeId: string, sortType: string
   const httpClient = new HTTP();
   const tubeService = new YTubeService(httpClient);
 
+
   const watchPageURL = tubeService.BASE_URL ;
-  const ytApi = `${watchPageURL}`;
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36',
+  };
+  const params = {};
+
+  const url = urllib.format({
+    protocol: 'https',
+    host: "www.youtube.com",
+    pathname: "watch",
+    query: {
+      v: youtubeId,
+      hl: 'en',
+      bpctr: `${Math.ceil(Date.now() / 1000)}`,
+      has_verified: 1,
+    },
+  });
+
 
   // request yt page
-  const response = await httpClient.get(ytApi, {
-    v:youtubeId,
-    hl:'en',
-    bpctr: Math.ceil(Date.now() / 1000),
-    has_verified: 1,
-  },
-  {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36',
-  });
-  const body: any = querystring.parse(response.data);
+  try {
+    const response = await httpClient.get(url, params, headers);
+    const body = response.data
+
 
   // get json from html
   const info = { page: 'watch', player_response: '', response: '', html5player: '' };
@@ -57,6 +68,9 @@ export async function searchVideo(this: any, youtubeId: string, sortType: string
   }
 
   // fetch formats and more
-  const infoResponse = await tubeService.gotConfig(youtubeId, null, info, tubeService);
+  const infoResponse = await tubeService.gotConfig(youtubeId, null, info, tubeService, httpClient);
   return infoResponse
+  }catch (e) {
+    console.log(e)
+  }
 }

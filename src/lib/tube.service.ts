@@ -1,5 +1,6 @@
 import {HTTP} from '@ionic-native/http/ngx';
 import querystring from "querystring";
+import * as urllib from 'url';
 
 const jsonClosingChars = /^[)\]}'\s]+/;
 
@@ -143,11 +144,11 @@ export class YTubeService {
     }
   };
 
-  async gotConfig(id: any, additional: any, info: any, tubeService: any) {
+  async gotConfig(id: any, additional: any, info: any, tubeService: any, httpClient: any) {
     const funcs = [];
     const [iosPlayerResponse, androidPlayerResponse] = await Promise.all([
-      tubeService.fetchIosJsonPlayer(id, tubeService),
-      tubeService.fetchAndroidJsonPlayer(id, tubeService),
+      tubeService.fetchIosJsonPlayer(id, tubeService, httpClient),
+      tubeService.fetchAndroidJsonPlayer(id, tubeService, httpClient),
     ]);
 
     info.formats = this.parseFormats(androidPlayerResponse).concat(this.parseFormats(iosPlayerResponse));
@@ -167,7 +168,7 @@ export class YTubeService {
     return Array.from({ length }, () => CPN_CHARS[Math.floor(Math.random() * CPN_CHARS.length)]).join('');
   };
 
-  async fetchIosJsonPlayer(videoId :any, tubeService:any) {
+  async fetchIosJsonPlayer(videoId :any, tubeService:any, httpClient: any) {
     const payload = {
       videoId,
       cpn: tubeService.generateClientPlaybackNonce(16),
@@ -196,17 +197,32 @@ export class YTubeService {
       },
     };
 
+    const url = urllib.format({
+      protocol: 'https',
+      host: "youtubei.googleapis.com",
+      pathname: "youtubei/v1/player",
+      query: {
+        id: videoId,
+        prettyPrint: 'false',
+        t: tubeService.generateClientPlaybackNonce(12),
+      },
+    });
+
+
     // request yt page
-    const response = await this.httpClient.post(`https://youtubei.googleapis.com/youtubei/v1/player?id=${videoId}&prettyPrint=false&t=`+tubeService.generateClientPlaybackNonce(12),
-        JSON.stringify(payload)
-        ,{
+    const response = await httpClient.sendRequest(url, {
+      method: 'post',
+      serializer: 'json',
+      data: payload,
+      headers: {
         'Content-Type': 'application/json',
         'User-Agent': `com.google.ios.youtube/${IOS_CLIENT_VERSION}(${
             IOS_DEVICE_MODEL
         }; U; CPU iOS ${IOS_USER_AGENT_VERSION} like Mac OS X; en_US)`,
         'X-Goog-Api-Format-Version': '2',
-      });
-    const body: any = querystring.parse(response.data);
+      }
+    });
+    const body: any = response.data;
 
     const playErr = tubeService.playError(body);
     if (playErr) throw playErr;
@@ -218,7 +234,7 @@ export class YTubeService {
     }
   };
 
-  async fetchAndroidJsonPlayer(videoId: any, tubeService: any){
+  async fetchAndroidJsonPlayer(videoId: any, tubeService: any, httpClient: any){
     const payload = {
       videoId,
       cpn: tubeService.generateClientPlaybackNonce(16),
@@ -246,17 +262,30 @@ export class YTubeService {
       },
     };
 
-    // request yt page
-    const response = await this.httpClient.post(`https://youtubei.googleapis.com/youtubei/v1/player?id=${videoId}&prettyPrint=false&t=`+tubeService.generateClientPlaybackNonce(12),
-        JSON.stringify(payload)
-        ,{
-          'Content-Type': 'application/json',
-          'User-Agent': `com.google.android.youtube/${ANDROID_CLIENT_VERSION
-          } (Linux; U; Android ${ANDROID_OS_VERSION}; en_US) gzip`,
-          'X-Goog-Api-Format-Version': '2',
-        });
-    const body: any = querystring.parse(response.data);
+    const url = urllib.format({
+      protocol: 'https',
+      host: "youtubei.googleapis.com",
+      pathname: "youtubei/v1/player",
+      query: {
+        id: videoId,
+        prettyPrint: 'false',
+        t: tubeService.generateClientPlaybackNonce(12),
+      },
+    });
 
+    // request yt page
+    const response = await httpClient.sendRequest(url, {
+      method: 'post',
+      serializer: 'json',
+      data: payload,
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': `com.google.android.youtube/${ANDROID_CLIENT_VERSION
+        } (Linux; U; Android ${ANDROID_OS_VERSION}; en_US) gzip`,
+        'X-Goog-Api-Format-Version': '2',
+      }
+    });
+    const body: any = response.data;
 
     const playErr = tubeService.playError(body);
     if (playErr) throw playErr;
