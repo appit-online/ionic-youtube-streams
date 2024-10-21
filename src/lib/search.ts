@@ -1,68 +1,62 @@
 import * as urllib from 'url';
-import {BasicInfoService} from './basic-info.service';
-import {CiphService} from './cip.service';
 import {HTTP} from '@ionic-native/http/ngx';
-import { UtilsService } from './functions/utils.service';
-import { WatchHtmlService } from './functions/watch-html.service';
-import { FormatUtilsService } from './format-utils.service';
+import {YTubeService} from "./tube.service";
+import querystring from "querystring";
 
 export async function searchVideo(this: any, youtubeId: string, sortType: string) {
   const httpClient = new HTTP();
-  const options = {};
-  const utilsService = new UtilsService();
-  const basicInfoService = new BasicInfoService(httpClient, utilsService);
-  const info = await basicInfoService.getBasicInfo(youtubeId, {});
+  const tubeService = new YTubeService(httpClient);
 
-/*  const hasManifest =
-    info.player_response && info.player_response.streamingData && (
-      info.player_response.streamingData.dashManifestUrl ||
-      info.player_response.streamingData.hlsManifestUrl
-    );*/
+  const watchPageURL = tubeService.BASE_URL ;
+  const ytApi = `${watchPageURL}`;
 
-  const funcs = [];
-  if (info.formats.length) {
-    const watchHtmlService = new WatchHtmlService(httpClient);
+  // request yt page
+  const response = await httpClient.get(ytApi, {
+    v:youtubeId,
+    hl:'en',
+    bpctr: Math.ceil(Date.now() / 1000),
+    has_verified: 1,
+  },
+  {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36',
+  });
+  const body: any = querystring.parse(response.data);
 
-    info.html5player = info.html5player || utilsService.getHTML5player(await watchHtmlService.getHTMLWatchPageBody(youtubeId, options, utilsService, httpClient));
-    if (!info.html5player) {
-      throw Error('Unable to find html5player file');
+  // get json from html
+  const info = { page: 'watch', player_response: '', response: '', html5player: '' };
+  try {
+    try {
+      info.player_response =
+          tubeService.tryParseBetween(body, 'var ytInitialPlayerResponse = ', '}};', '', '}}') ||
+          tubeService.tryParseBetween(body, 'var ytInitialPlayerResponse = ', ';var') ||
+          tubeService.tryParseBetween(body, 'var ytInitialPlayerResponse = ', ';</script>') ||
+          tubeService.findJSON('watch.html', 'player_response', body, /\bytInitialPlayerResponse\s*=\s*\{/i, '</script>', '{', tubeService);
+    } catch (_e) {
+      const args = tubeService.findJSON('watch.html', 'player_response', body, /\bytplayer\.config\s*=\s*{/, '</script>', '{', tubeService);
+      info.player_response = tubeService.findPlayerResponse('watch.html', args, tubeService);
     }
-    const html5player = urllib.resolve(utilsService.VIDEO_URL, info.html5player);
-    const ciphService = new CiphService(httpClient);
-    funcs.push(await ciphService.decipherFormats(info.formats, html5player, options));
+
+    info.response =
+        tubeService.tryParseBetween(body, 'var ytInitialData = ', '}};', '', '}}') ||
+        tubeService.tryParseBetween(body, 'var ytInitialData = ', ';</script>') ||
+        tubeService.tryParseBetween(body, 'window["ytInitialData"] = ', '}};', '', '}}') ||
+        tubeService.tryParseBetween(body, 'window["ytInitialData"] = ', ';</script>') ||
+        tubeService.findJSON('watch.html', 'response', body, /\bytInitialData("\])?\s*=\s*\{/i, '</script>', '{', tubeService);
+    // @ts-ignore
+    info.html5player = tubeService.getHTML5player(body);
+  } catch (_) {
+    throw Error(
+        'Error when parsing watch.html, maybe YouTube made a change: ' + body
+    );
   }
 
-  /*if (hasManifest && info.player_response.streamingData.dashManifestUrl) {
-    const url = info.player_response.streamingData.dashManifestUrl;
-    funcs.push(getDashManifest(url, options));
+  // verify response
+  const playErr = tubeService.playError(info.player_response);
+  if (playErr) {
+    throw playErr;
   }
 
-  if (hasManifest && info.player_response.streamingData.hlsManifestUrl) {
-    let url = info.player_response.streamingData.hlsManifestUrl;
-    funcs.push(getM3U8(url, options));
-  }*/
-
-  const formatUtils = new FormatUtilsService();
-  const results = await Promise.all(funcs);
-  info.formats = Object.values(Object.assign({}, ...results));
-  info.formats = info.formats.map(formatUtils.addFormatMeta);
-
-  if(sortType === 'video'){
-    try{
-      info.formats.sort(formatUtils.sortFormatsByVideo);
-    }catch (e){
-      // tslint:disable-next-line:no-console
-      console.log(e);
-    }
-  }else{
-    try{
-      info.formats.sort(formatUtils.sortFormatsByAudio);
-    }catch (e){
-      // tslint:disable-next-line:no-console
-      console.log(e);
-    }
-  }
-  info.full = true;
-
-  return info;
+  // fetch formats and more
+  const infoResponse = await tubeService.gotConfig(youtubeId, null, info, tubeService);
+  return infoResponse
 }
