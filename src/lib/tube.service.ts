@@ -1,5 +1,4 @@
-import {HTTP} from '@ionic-native/http/ngx';
-import querystring from "querystring";
+import {HTTP} from '@awesome-cordova-plugins/http/ngx';
 import * as urllib from 'url';
 
 const jsonClosingChars = /^[)\]}'\s]+/;

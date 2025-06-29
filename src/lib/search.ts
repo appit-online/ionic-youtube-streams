@@ -1,7 +1,6 @@
 import * as urllib from 'url';
-import {HTTP} from '@ionic-native/http/ngx';
+import {HTTP} from '@awesome-cordova-plugins/http/ngx';
 import {YTubeService} from "./tube.service";
-import querystring from "querystring";
 
 export async function searchVideo(this: any, youtubeId: string, sortType: string) {
   const httpClient = new HTTP();
